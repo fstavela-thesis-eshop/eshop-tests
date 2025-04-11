@@ -49,8 +49,14 @@ class APIClient:
         self.session = Session()
         self.session.headers.update({"Content-Type": "application/json"})
         self.session.headers.update({"Accept": "application/json"})
+        self.username = username
         if username and password:
             self.session.auth = (username, password)
+
+    def change_password(self, password: str) -> None:
+        if not self.username:
+            raise ValueError("Username is not set, you can't change the password")
+        self.session.auth = (self.username, password)
 
     def request(
         self, method: str, endpoint: str, *args: Any, **kwargs: Any

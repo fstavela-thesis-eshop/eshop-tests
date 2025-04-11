@@ -81,6 +81,21 @@ def test_api_auth_endpoint(api_admin: APIClient, api_customer: APIClient) -> Non
     assert customer_response.json()["is_admin"] is False
 
 
+def test_api_change_password(api_temporary_customer: APIClient) -> None:
+    customer_id = api_temporary_customer.get("/users/auth").json()["id"]
+    response = api_temporary_customer.patch(
+        f"/users/customers/{customer_id}", json={"password": "new-password"}
+    )
+    assert response.status_code == 200
+
+    response = api_temporary_customer.get("/users/auth")
+    assert response.status_code == 401
+
+    api_temporary_customer.change_password("new-password")
+    response = api_temporary_customer.get("/users/auth")
+    assert response.status_code == 200
+
+
 @pytest.mark.parametrize("include_id", (True, False))
 def test_api_auth_headers_are_ignored(
     api_customer: APIClient, default_customer_id: str, admin_id: str, include_id: bool
